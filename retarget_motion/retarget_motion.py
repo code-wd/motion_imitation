@@ -21,8 +21,8 @@ import pybullet
 import pybullet_data as pd
 from motion_imitation.utilities import motion_util
 
-# import retarget_config_a1 as config
-import retarget_config_laikago as config
+import retarget_config_a1 as config
+# import retarget_config_laikago as config
 # import retarget_config_vision60 as config
 
 POS_SIZE = 3
@@ -247,6 +247,12 @@ def retarget_pose(robot, default_pose, ref_joint_pos):
                                                     restPoses=default_pose)
   joint_pose = np.array(joint_pose)
 
+  # 从这里看出，我们使用这个代码得到的 pace.txt 中的每一个 frame 实际上是下面的形式
+  # 前面三个是 root_pos 实际上就是机器人的中心位置（脖子和盆骨的中心）
+  # 后面四个是 root_rot 实际上是用四元数表示的一个三维空间的旋转角度
+  # 后面所有的是 joint_pose，实际上表示四肢的位置，四肢的位置每一个使用的是 3 个数值表示，一共 12 个
+  # 使用 IK 算法，根据目标四肢的位置逆向计算出关机的旋转角度 pybullet.calculateInverseKinematics2
+  # 因此，pose 的表示就是：3 + 4 + 4 * 3 = 19
   pose = np.concatenate([root_pos, root_rot, joint_pose])
 
   return pose
